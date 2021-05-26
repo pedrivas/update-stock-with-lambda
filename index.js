@@ -1,27 +1,22 @@
-const {Readable} = require("stream");
-const {createWriteStream} = require("fs");
-
+const AwsConfig = require('./Credentials_AWS')
+const WcConfig = require('./Credentials_WC')
 const WooCommerceRestApi = require("@woocommerce/woocommerce-rest-api").default;
-//import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-
-/// TENTATIVA NOVA
 
 const {
   S3Client,
   GetObjectCommand
 } = require("@aws-sdk/client-s3")
 
-const AWS_ACCESS_KEY_ID = 'AKIATYS6DR2VAR7ZHD7S';
-const AWS_SECRET_ACCESS_KEY = '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';
-
 const xlsx = require('xlsx');
+const awsConfig = new AwsConfig();
+const wcConfig = new WcConfig();
 
-const getContent = async() => {
+const getWorkbookFromS3 = async() => {
 	try {
 		console.log("> Getting content from S3");
 
     // Create a helper function to convert a ReadableStream to a string.
-    const streamToString = (stream) =>
+    const streamToWorkbook = (stream) =>
       new Promise((resolve, reject) => {
         const chunks = [];
         stream.on("data", (chunk) => chunks.push(chunk));
@@ -29,16 +24,16 @@ const getContent = async() => {
         stream.on("end", () => {
           //resolve(Buffer.concat(chunks).toString("utf8"));
           var buffer = Buffer.concat(chunks);
-          var workbook = xlsx.read(buffer);
-          console.log("workbook", workbook)
+          const workbook = xlsx.read(buffer);
+          return workbook;
         });
       });
 
     const s3Client = new S3Client({
-      region: "sa-east-1",
+      region: awsConfig.region,
       credentials: {
-        accessKeyId: AWS_ACCESS_KEY_ID,
-        secretAccessKey: AWS_SECRET_ACCESS_KEY
+        accessKeyId: awsConfig.AWS_ACCESS_KEY_ID,
+        secretAccessKey: awsConfig.AWS_SECRET_ACCESS_KEY
       }
     });
 
@@ -51,18 +46,16 @@ const getContent = async() => {
     const data  = await s3Client.send(new GetObjectCommand(bucketParams));
       //return data; // For unit tests.
 
-    // Convert the ReadableStream to a string.
-    const bodyContents = await streamToString(data.Body);
-    console.log(bodyContents);
-    //workbook = XLSX.read(bodyContents);
-      return workbook;
+    // Convert the ReadableStream to a workbook.
+    const workbook = await streamToWorkbook(data.Body);
+
+    return workbook;
 
   } catch (err) {
     console.log("Error", err);
   };
 }
-const buffer = getContent();
-console.log(buffer);
+const workbook = getWorkbookFromS3();
 
 exports.handler = function(event, context, callback) {
    const api = new WooCommerceRestApi({
@@ -71,13 +64,7 @@ exports.handler = function(event, context, callback) {
      consumerSecret: "cs_4ec3d70b4a2631884bb4b7b4740822135dac4121",
      version: "wc/v3"
    });
-   
-   /*
-   const Excel = require('exceljs');
-   
-   const deparaWorkbook = new Excel.Workbook();
-   const productsWorkbook = new Excel.Workbook();
-   
+      
    var dePara = [];
    
    const deParaFileName = './assets/DEPARA_PRODUTOS.xlsx';
@@ -98,16 +85,14 @@ exports.handler = function(event, context, callback) {
      updateQuantity();
      }
    )
-   */
-   updateQuantity();
    
    async function updateQuantity(){
      var requestBody = null
-     //for(var product = 0;product <= dePara.length;product++ ) {
-    //   requestBody = JSON.stringify({
-    //      manage_stock: true,
-    //      stock_quantity: dePara[product][1]
-    //   })
+     for(var product = 0;product <= dePara.length;product++ ) {
+      requestBody = JSON.stringify({
+         manage_stock: true,
+         stock_quantity: dePara[product][1]
+      })
        requestBody = JSON.stringify({"description": "Lambda Funcionando!"})
        requestBody = JSON.parse(requestBody)
        //await api.put(`products/${dePara[product][0]}`,requestBody)
@@ -131,5 +116,6 @@ exports.handler = function(event, context, callback) {
            });
    
      //}
+    }
    }
 };

@@ -1,0 +1,31 @@
+{
+  "name": "update-stock-with-lambda",
+  "version": "1.0.0",
+  "description": "Send Api requests from a AWS Lambda function when a file is uploaded to an S3 bucket.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pedrivas/update-stock-with-lambda.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pedrivas/update-stock-with-lambda/issues"
+  },
+  "homepage": "https://github.com/pedrivas/update-stock-with-lambda#readme",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.3.0",
+    "@aws-sdk/node-http-handler": "^3.3.0",
+    "@aws-sdk/types": "^3.3.0",
+    "@woocommerce/woocommerce-rest-api": "^1.0.1",
+    "ts-node": "^9.0.0",
+    "xlsx": "^0.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.23",
+    "typescript": "^4.0.2"
+  }
+}

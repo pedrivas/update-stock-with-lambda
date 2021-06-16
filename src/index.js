@@ -9,7 +9,7 @@ async function lambda() {
   const updateStock = new UpdateStock();
   const addItemsOnDynamoDB = new AddItemsOnDynamoDB();
 
-  await addItemsOnDynamoDB.verifyIfExists();
+  await addItemsOnDynamoDB.addItemsToDynamoDB();
   await updateStock.getWorkbookFromS3(true);
   
 };

@@ -7,7 +7,7 @@ class UpdateStock {
 
     }
     
-    async getWorkbookFromS3(update)  {
+    async getWorkbookFromS3(update, cb)  {
         try {
           console.log("> Getting content from S3");
 
@@ -56,7 +56,7 @@ class UpdateStock {
             if (update) {
                 updateQuantity(wb);
             } else {
-                return wb;
+                return cb(wb);
             }
           });
       

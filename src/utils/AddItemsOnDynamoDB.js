@@ -5,13 +5,14 @@ const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
 
 class AddItemsOnDynamoDB {
 
-    items;
+    item;
     updateStock;    
     itemParams;
-    client = new DynamoDBClient({ region: "sa-east-1" });
+    DDBclient = new DynamoDBClient({ region: "sa-east-1" });
+    itemKey;
+    itemExists;
 
     constructor() {
-        this.items = [];
         this.updateStock = new UpdateStock();
     }
 
@@ -34,13 +35,16 @@ class AddItemsOnDynamoDB {
 
         
 
-        for (var items = 1; items <= numberOfItems; items++  ) {
+        for (var itemRow = 2; itemRow <= numberOfitemRow; itemRow++  ) {
+
+            this.setItemProperties(itemRow)
+
             this.itemParams = {
                 Item: {
-                "AlbumTitle": {
-                S: "Somewhat Famous"
+                "uuid": {
+                S: "118"
                 }, 
-                "Artist": {
+                "WC": {
                 S: "No One You Know"
                 }, 
                 "SongTitle": {
@@ -48,41 +52,57 @@ class AddItemsOnDynamoDB {
                 }
                 }, 
                 ReturnConsumedCapacity: "TOTAL", 
-                TableName: "Music"
+                TableName: "products-toca"
             };
 
-            if (this.veryfyIfItemExists(this.itemParams)) {
-                this.updateItem(this.itemParams);
+            this.itemKey = {
+                TableName: 'products-toca',
+                Key: {'uuid': '118'},
+            }
+
+            if (this.getItem()) {
+                this.updateItem();
             } else {
-                this.putItem(this.itemParams);
+                this.putItem();
             }
         }
 
     }
 
-    veryfyIfItemExists(item) {
-        itemExists = true;
+    getItem() {
 
-        return itemExists
     }
 
-    putItem(item) {
-        dynamodb.putItem(params, function(err, data) {
-            if (err) console.log(err, err.stack); // an error occurred
-            else     console.log(data);           // successful response
-            /*
-            data = {
-            ConsumedCapacity: {
-            CapacityUnits: 1, 
-            TableName: "Music"
-            }
-            }
-            */
-        });
+    async putItem() {
+        // dynamodb.putItem(params, function(err, data) {
+        //     if (err) console.log(err, err.stack); // an error occurred
+        //     else     console.log(data);           // successful response
+        //     /*
+        //     data = {
+        //     ConsumedCapacity: {
+        //     CapacityUnits: 1, 
+        //     TableName: "Music"
+        //     }
+        //     }
+        //     */
+        // });
+        const data  = await this.DDBclient.send(new PutItemCommand(this.itemParams));
+        console.log(data);
+
     }
 
-    updateItem(item) {
+    updateItem() {
 
+    }
+
+    setItemProperties(itemRow){
+        let uuidCellAdress = `A${itemRow}`
+        let uuidCell = worksheet[uuidCellAdress];
+        this.item.uuid = (uuidCell ? uuidCell.v : undefined);
+        
+        let priceCellAdress = `H${itemRow}`
+        let priceCell = worksheet[priceCellAdress];
+        this.item.price = (priceCell ? priceCell.v : undefined);
     }
 
 }

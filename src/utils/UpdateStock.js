@@ -44,7 +44,7 @@ class UpdateStock {
       
           const bucketParams = {
                 Bucket: "excel-products-database-toca-das-raposas",
-                Key: "DEPARA_PRODUTOS.xlsx",
+                Key: "Estoque210237.xls",
           };
       
           // Get the object} from the Amazon S3 bucket. It is returned as a ReadableStream.

@@ -1,7 +1,7 @@
 const AwsConfig = require('../configs/Credentials_AWS');
 const UpdateStock = require(('./UpdateStock')) ;
 
-const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, PutItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
 
 class AddItemsOnDynamoDB {
 
@@ -11,44 +11,45 @@ class AddItemsOnDynamoDB {
     DDBclient = new DynamoDBClient({ region: "sa-east-1" });
     itemKey;
     itemExists;
+    ddbItem;
 
     constructor() {
         this.updateStock = new UpdateStock();
+        this.item = {};
     }
 
     async addItemsToDynamoDB() {
-        const wb = await this.updateStock.getWorkbookFromS3(false, (wb) => {
-            console.log(wb);
+        await this.updateStock.getWorkbookFromS3(false, (wb) => {
             this.addItems(wb);
         });
 
     }
 
-    addItems(wb) {
+    async addItems(wb) {     
+
         let sheetName = wb.SheetNames[0];
         let worksheet = wb.Sheets[sheetName];
-
-        
     
         const numberOfItems = parseInt((worksheet["!ref"]).substr(4,3));
         /* This example adds a new item to the Music table. */
 
-        
+        for (var itemRow = 2; itemRow <= numberOfItems; itemRow++  ) {
 
-        for (var itemRow = 2; itemRow <= numberOfitemRow; itemRow++  ) {
-
-            this.setItemProperties(itemRow)
+            this.setItemProperties(itemRow, wb);
 
             this.itemParams = {
                 Item: {
                 "uuid": {
-                S: "118"
+                S: this.item.uuid
                 }, 
-                "WC": {
-                S: "No One You Know"
+                "Price": {
+                N: this.item.price
                 }, 
-                "SongTitle": {
-                S: "Call Me Today"
+                "Quantity": {
+                N: this.item.quantity
+                },
+                "SKU": {
+                S: this.item.SKU
                 }
                 }, 
                 ReturnConsumedCapacity: "TOTAL", 
@@ -57,10 +58,14 @@ class AddItemsOnDynamoDB {
 
             this.itemKey = {
                 TableName: 'products-toca',
-                Key: {'uuid': '118'},
+                Key: {
+                        uuid: { S: this.item.uuid},
+                    },
             }
 
-            if (this.getItem()) {
+            let response = await this.getItem();
+
+            if (this.ddbItem) {
                 this.updateItem();
             } else {
                 this.putItem();
@@ -69,9 +74,25 @@ class AddItemsOnDynamoDB {
 
     }
 
-    getItem() {
+    async getItem() {
+
+        // PARA TESTES
+        this.itemKey.Key.uuid.S = '109'
+
+        await this.DDBclient.send(new GetItemCommand(this.itemKey))
+        .then((response) => {
+            // Successful request
+            console.log(response.Item);
+            this.ddbItem = response.Item;
+            return response.Item;
+        })
+        .catch((error) => {
+            console.log("Error", error);
+        })
 
     }
+
+
 
     async putItem() {
         // dynamodb.putItem(params, function(err, data) {
@@ -95,14 +116,26 @@ class AddItemsOnDynamoDB {
 
     }
 
-    setItemProperties(itemRow){
+    setItemProperties(itemRow, wb){
+        let sheetName = wb.SheetNames[0];
+        let worksheet = wb.Sheets[sheetName];
+
         let uuidCellAdress = `A${itemRow}`
         let uuidCell = worksheet[uuidCellAdress];
-        this.item.uuid = (uuidCell ? uuidCell.v : undefined);
+        this.item.uuid = (uuidCell ? uuidCell.v.toString() : undefined);
         
         let priceCellAdress = `H${itemRow}`
         let priceCell = worksheet[priceCellAdress];
         this.item.price = (priceCell ? priceCell.v : undefined);
+
+        let quantityCellAdress = `L${itemRow}`
+        let quantityCell = worksheet[quantityCellAdress];
+        this.item.quantity = (quantityCell ? quantityCell.v : undefined);
+
+        let SKUCellAdress = `C${itemRow}`
+        let SKUCell = worksheet[SKUCellAdress];
+        this.item.SKU = (SKUCell ? SKUCell.v : undefined);
+
     }
 
 }

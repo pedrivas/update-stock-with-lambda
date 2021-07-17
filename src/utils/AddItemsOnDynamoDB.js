@@ -2,7 +2,7 @@ const AwsConfig = require('../configs/Credentials_AWS');
 const UpdateStock = require(('./UpdateStock')) ;
 
 const { DynamoDBClient, PutItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
-const { marshall } = require("@aws-sdk/util-dynamodb");
+const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 
 class AddItemsOnDynamoDB {
 
@@ -37,56 +37,14 @@ class AddItemsOnDynamoDB {
         for (var itemRow = 2; itemRow <= numberOfItems; itemRow++  ) {
 
             this.setItemProperties(itemRow, wb);
+            this.setItemKey();
 
-            /*
-            this.itemParams = {
-                TableName: "products-toca",
-                Item: {
-                    "uuid": {
-                    S: this.item.uuid
-                    }, 
-                    "Price": {
-                    N: this.item.price
-                    }, 
-                    "Quantity": {
-                    N: this.item.quantity
-                    },
-                    "SKU": {
-                    S: this.item.SKU
-                    }
-                }, 
-                ReturnConsumedCapacity: "TOTAL", 
-                TableName: "products-toca"
-            };
-            */
+            await this.getItem();
 
-            this.itemParams = {
-                TableName: "products-toca",
-                Item: marshall({
-                    "uuid": this.item.uuid, 
-                    "Name": this.item.name,
-                    "Price": this.item.price, 
-                    "Quantity": this.item.quantity,
-                    "SKU": this.item.SKU
-                }), 
-                ReturnConsumedCapacity: "TOTAL", 
-                TableName: "products-toca"
-            };
+            this.setItemParams();
+            
+            await this.putItem();
 
-            this.itemKey = {
-                TableName: 'products-toca',
-                Key: {
-                        uuid: { S: this.item.uuid},
-                    },
-            }
-
-            let response = await this.getItem();
-
-            if (this.ddbItem) {
-                await this.updateItem();
-            } else {
-                await this.putItem();
-            }
         }
 
     }
@@ -106,8 +64,6 @@ class AddItemsOnDynamoDB {
 
     }
 
-
-
     async putItem() {
         const data  = await this.DDBclient.send(new PutItemCommand(this.itemParams))
         .then((response) => {
@@ -116,10 +72,6 @@ class AddItemsOnDynamoDB {
         .catch((error) => {
             console.log("Error", error);
         })
-
-    }
-
-    updateItem() {
 
     }
 
@@ -147,6 +99,40 @@ class AddItemsOnDynamoDB {
         let SKUCell = worksheet[SKUCellAdress];
         this.item.SKU = (SKUCell ? SKUCell.v : undefined);
 
+    }
+
+    setItemParams() {
+
+        if (this.ddbItem) {
+            this.item.WC = this.ddbItem.WC ? unmarshall(this.ddbItem.WC) : '';
+            this.item.WCVariationOf = this.ddbItem.WCVariationOf ? unmarshall(this.ddbItem.WCVariationOf) : '';
+        } 
+
+        let params = {
+            "uuid": this.item.uuid, 
+            "Name": this.item.name,
+            "Price": this.item.price, 
+            "Quantity": this.item.quantity,
+            "SKU": this.item.SKU,
+            "WC": this.item.WC,
+            "WCVariationOf": this.item.WCVariationOf,
+        };
+
+        this.itemParams = {
+            TableName: "products-toca",
+            Item: marshall(params), 
+            ReturnConsumedCapacity: "TOTAL", 
+            TableName: "products-toca"
+        };
+    }
+
+    setItemKey() {
+        this.itemKey = {
+            TableName: 'products-toca',
+            Key: {
+                    uuid: { S: this.item.uuid},
+                },
+        }
     }
 
 }

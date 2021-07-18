@@ -76,6 +76,8 @@ class AddItemsOnDynamoDB {
     }
 
     setItemProperties(itemRow, wb){
+
+        this.item = {};
         let sheetName = wb.SheetNames[0];
         let worksheet = wb.Sheets[sheetName];
 
@@ -104,9 +106,12 @@ class AddItemsOnDynamoDB {
     setItemParams() {
 
         if (this.ddbItem) {
-            this.item.WC = this.ddbItem.WC ? unmarshall(this.ddbItem.WC) : '';
-            this.item.WCVariationOf = this.ddbItem.WCVariationOf ? unmarshall(this.ddbItem.WCVariationOf) : '';
-        } 
+            this.item.WC = this.ddbItem.WC.S ? this.ddbItem.WC.S : '';
+            this.item.WCVariationOf = this.ddbItem.WCVariationOf.S ? this.ddbItem.WCVariationOf.S : '';
+        } else {
+            this.item.WC = '';
+            this.item.WCVariationOf = '';
+        }
 
         let params = {
             "uuid": this.item.uuid, 

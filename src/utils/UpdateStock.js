@@ -105,6 +105,39 @@ class UpdateStock {
         //}
       }
   }
+
+  async queryDDB() {
+    const { DynamoDBClient, QueryCommand } = require("@aws-sdk/client-dynamodb");
+    const { marshall } = require("@aws-sdk/util-dynamodb");
+
+    const DDBclient = new DynamoDBClient({ region: "sa-east-1" });
+
+    const queryParams = {
+      TableName: 'products-toca',
+      KeyConditionExpression: "#wc between :lesserValue and :greaterValue",
+      ExpressionAttributeNames:{
+        "#wc": "WC"
+    },
+      IndexName: 'WC-index',
+      ExpressionAttributeValues: marshall({
+          ":lesserValue": "0001",
+          ":greaterValue": "9999"
+      })
+    }
+
+    const query  = await DDBclient.send(new QueryCommand(queryParams))
+    .then((response) => {
+      response.Items.forEach(function (element, index, array) {
+        console.log(element.Title.S + " (" + element.Subtitle.S + ")");
+      });
+      console.log(response);
+    })
+    .catch((error) => {
+      console.log("Error", error);
+    })
+
+    }
+
 }
 
 module.exports = UpdateStock

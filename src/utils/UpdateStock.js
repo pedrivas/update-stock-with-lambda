@@ -242,7 +242,7 @@ class UpdateStock {
       regular_price: this.item.price.toString()
     })
     requestBody = JSON.parse(requestBody);
-    const url = this.item.WCVariationOf ? `products/${this.item.WC}/variations/${this.item.WCVariationOf}` : `products/${this.item.WC}`
+    const url = this.item.WCVariationOf ? `products/${this.item.WCVariationOf}/variations/${this.item.WC}` : `products/${this.item.WC}`
     await wc.api.put(url,requestBody)
     .then((response) => {
       console.log("Response Status:", response.status);

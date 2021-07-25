@@ -1,0 +1,9 @@
+Resources:
+  updatestockwithlambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: C:/Users/Drivas/Documents/sources/update-stock-with-lambda
+      Runtime: nodejs14.x
+      Environment:
+        Variables: {}

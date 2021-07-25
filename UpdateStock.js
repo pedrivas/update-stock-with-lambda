@@ -1,5 +1,5 @@
-const AwsConfig = require('../configs/Credentials_AWS')
-const Wc = require('../configs/Credentials_WC')
+const AwsConfig = require('./configs/Credentials_AWS')
+const Wc = require('./configs/Credentials_WC')
 const { DynamoDBClient, PutItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 
@@ -61,12 +61,8 @@ class UpdateStock {
         //return data; // For unit tests.
   
       // Convert the ReadableStream to a workbook.
-      const workbook = await streamToWorkbook(data.Body, (wb) => {
-        if (update) {
-          updateQuantity(wb);
-        } else {
-          return cb(wb);
-        }
+      const workbook = await streamToWorkbook(data.Body, (wb) => {     
+          return cb(wb);        
       });
   
       return workbook;

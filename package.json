@@ -4,7 +4,9 @@
   "description": "Send Api requests from a AWS Lambda function when a file is uploaded to an S3 bucket.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "predeploy": "cd ./node_modules/ && rmdir xlsx /S/Q && npm install --platform linux --arch=x64 --target=12.x xlsx",
+    "deploy": "serverless deploy -v",
+    "post deploy": "cd ./node_modules/ && rmdir xlsx /S/Q $$ npm install xlsx"
   },
   "repository": {
     "type": "git",
@@ -24,6 +26,7 @@
     "@aws-sdk/util-dynamodb": "^3.21.0",
     "@woocommerce/woocommerce-rest-api": "^1.0.1",
     "aws-sdk": "^2.948.0",
+    "linux": "^4.2.1",
     "ts-node": "^9.0.0",
     "xlsx": "^0.17.0"
   },

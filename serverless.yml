@@ -1,0 +1,33 @@
+service: update-stock-with-lambda
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: sa-east-1
+  memorySize: 256
+  lambdaHashingVersion: 20201221
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:Query
+      Resource:
+        - "arn:aws:s3:::excel-products-database-toca-das-raposas2"
+        - "arn:aws:dynamodb:sa-east-1:258969145002:table/products-toca"
+functions:
+  integration:
+    handler: integration.handle
+    environment:
+      bucket: excel-products-database-toca-das-raposas2
+    events: 
+      - s3:
+          bucket: excel-products-database-toca-das-raposas2
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .xls
+
+

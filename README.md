@@ -42,4 +42,4 @@ Deploy the application to your AWS account
 serverless deploy -v
 ```
 
-Run the index.js file.
+Upload a xls file to the s3 bucket to trigger the lambda function.

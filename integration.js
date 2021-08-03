@@ -29,7 +29,7 @@ module.exports.handle = async ({ Records: records }, context) => {
   });
 
   const bucketParams = {
-      Bucket: "excel-products-database-toca-das-raposas",
+      Bucket: "excel-products-database-toca-das-raposas2",
       Key: "Estoque210237.xls",
     };
 

@@ -2,13 +2,13 @@
 
 This project has the objective of integrate the stock data of a local store with the woocommerce store.
 
-I'm currently developing some improvements to make it work with AWS Lambda and Puppeteer.
+I'm currently developing some improvements to make it work with Puppeteer.
 
 ## Technology
 
 ☁ Cloud: AWS - S3, Dynamo DB, Lambda, CloudFormation
 
-⬅ Backend: Node js
+⬅ Backend: Node js, Serverless Framework
 
 ## Getting Started
 
@@ -29,6 +29,17 @@ Upload the .xls file to the s3 bucket.
 Git clone this repository, then
 ```
 npm i 
+```
+Global Install and Configure the serverless Framework
+```
+npm i -g serverless
+
+serverless config credentials --provider aws --key AKYourKey --secret YourSecret 
+```
+
+Deploy the application to your AWS account
+```
+serverless deploy -v
 ```
 
 Run the index.js file.
